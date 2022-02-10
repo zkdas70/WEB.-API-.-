@@ -13,15 +13,9 @@ class Example(QWidget):
         super().__init__()
         self.getImage()
         self.initUI()
-        self.cords = []
-        self.scale = 0.002
-        self.type_map = 'map'
 
     def getImage(self):
         map_request = "http://static-maps.yandex.ru/1.x/?ll=37.530887,55.703118&spn=0.002,0.002&l=map"
-        params = {
-            'll': ','.join(map(str))
-        }
         response = requests.get(map_request)
 
         if not response:
