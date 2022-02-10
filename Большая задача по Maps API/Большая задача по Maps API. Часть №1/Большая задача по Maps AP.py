@@ -5,8 +5,13 @@ import requests
 from PyQt5.QtGui import QPixmap
 from PyQt5.QtWidgets import QApplication, QWidget, QLabel
 from PyQt5 import uic
+from PyQt5.QtCore import Qt
 
-SCREEN_SIZE = [600, 450]
+COEFF_SCALING = 2
+
+
+class NoMap(BaseException):
+    pass
 
 
 class Example(QWidget):
@@ -18,28 +23,43 @@ class Example(QWidget):
         self.coords = [37.530887, 55.7031181]
         self.scale = 0.002
         self.map_type = 'map'
-        self.getImage()
+        self.getImage(self.coords, self.scale)
 
-    def getImage(self):
+    def getImage(self, coords, scale):
         map_request = "http://static-maps.yandex.ru/1.x/?ll=37.530887,55.703118&spn=0.002,0.002&l=map"
         # response = requests.get(map_request)
         params = {
-            'll': ','.join(map(str, self.coords)),
-            'spn': f'{self.scale},{self.scale}',
+            'll': ','.join(map(str, coords)),
+            'spn': f'{scale},{scale}',
             'l': self.map_type
         }
         response = requests.get(self.static_uri, params=params)
 
         if not response:
-            print("Ошибка выполнения запроса:")
-            print(map_request)
-            print("Http статус:", response.status_code, "(", response.reason, ")")
-            sys.exit(1)
+            raise NoMap
 
         self.map = response.content
         self.pixmap = QPixmap()
         self.pixmap.loadFromData(self.map, 'PNG')
         self.image.setPixmap(self.pixmap)
+
+    def keyPressEvent(self, a0):
+        if a0.key() == Qt.Key_PageUp:
+            new_scale = self.scale / COEFF_SCALING
+            try:
+                self.getImage(self.coords, new_scale)
+            except NoMap:
+                pass
+            else:
+                self.scale = new_scale
+        elif a0.key() == Qt.Key_PageDown:
+            new_scale = self.scale * COEFF_SCALING
+            try:
+                self.getImage(self.coords, new_scale)
+            except NoMap:
+                pass
+            else:
+                self.scale = new_scale
 
 
 if __name__ == '__main__':
