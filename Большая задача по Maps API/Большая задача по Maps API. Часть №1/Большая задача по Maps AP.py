@@ -44,7 +44,8 @@ class Example(QWidget):
         self.image.setPixmap(self.pixmap)
 
     def keyPressEvent(self, a0):
-        if a0.key() == Qt.Key_PageUp:
+        key = a0.key()
+        if key == Qt.Key_PageUp:
             new_scale = self.scale / COEFF_SCALING
             try:
                 self.getImage(self.coords, new_scale)
@@ -52,7 +53,7 @@ class Example(QWidget):
                 pass
             else:
                 self.scale = new_scale
-        elif a0.key() == Qt.Key_PageDown:
+        elif key == Qt.Key_PageDown:
             new_scale = self.scale * COEFF_SCALING
             try:
                 self.getImage(self.coords, new_scale)
@@ -60,6 +61,22 @@ class Example(QWidget):
                 pass
             else:
                 self.scale = new_scale
+        elif key in (Qt.Key_Left, Qt.Key_Right, Qt.Key_Up, Qt.Key_Down):
+            new_cords = self.coords[:]
+            if key == Qt.Key_Left:
+                new_cords[0] -= self.scale
+            elif key == Qt.Key_Right:
+                new_cords[0] += self.scale
+            elif key == Qt.Key_Up:
+                new_cords[1] -= self.scale
+            elif key == Qt.Key_Down:
+                new_cords[1] += self.scale
+            try:
+                self.getImage(new_cords, self.scale)
+            except NoMap:
+                pass
+            else:
+                self.coords = new_cords
 
 
 if __name__ == '__main__':
